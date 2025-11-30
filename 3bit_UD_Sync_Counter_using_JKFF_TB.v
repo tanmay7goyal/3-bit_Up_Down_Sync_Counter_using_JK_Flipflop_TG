@@ -1,57 +1,53 @@
+`timescale 1ns/1ps
+
 module sync_jk_3bit_tb;
 
-    
     reg clk;
     reg rst;
     reg ud;
-    wire j2, k2;
-    wire j1, k1;
-    wire j0, k0;
-
-   
     wire q2, q1, q0;
 
-    
+    // Instantiate the DUT
     sync_jk_3bit uut (
         .clk(clk),
         .rst(rst),
-        .j2(j2),
-        .k2(k2),
-        .j1(j1),
-        .k1(k1),
-        .j0(j0),
-        .k0(k0),
+        .ud(ud),
         .q2(q2),
         .q1(q1),
-        .q0(q0),
-        .ud(ud)
+        .q0(q0)
     );
 
-    // Clock generation
+    // Clock generation: 10ns period
     initial begin
         clk = 0;
-        ud = 1;
-        forever #5 clk = ~clk; 
+        forever #5 clk = ~clk;
     end
 
-   
+    // Apply stimulus
     initial begin
-        
-        rst = 1;  
-        
+        // Initial values
+        rst = 1;   // start with reset active
+        ud  = 1;   // start with UP count
 
-        // Apply reset
-        #10 rst = 0; 
-          
-        #75 ud = 0;
-       
-      #150  $finish;
+        #20 rst = 0;   // release reset
+
+        // Count UP for some time
+        #100;
+
+        // Change direction to DOWN
+        ud = 0;
+
+        // Count DOWN for some time
+        #100;
+
+        $finish;
     end
 
-    
+    // Monitor output
     initial begin
-        $monitor("At time %0t: rst = %b, q2=%b,q1=%b,q0=%b", 
-                 $time, rst, q2,q1,q0);
+        $monitor("Time=%0t | rst=%b ud=%b | q2q1q0 = %b%b%b",
+                  $time, rst, ud, q2, q1, q0);
     end
 
 endmodule
+
